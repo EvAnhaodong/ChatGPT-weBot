@@ -3,13 +3,15 @@ import json
 import time
 import re
 import websocket
+from revChatGPT.V3 import Chatbot
 
-from revChat.revChatGPT import Chatbot, configure
+
 
 # config
 with open(".config/config.json", encoding="utf-8") as f:
     config = json.load(f)
 f.close()
+
 
 server_host = config["server_host"]
 autoReply = config["autoReply"]
@@ -21,10 +23,7 @@ prvReplyMode = config["prvReplyMode"]
 prvCitationMode = config["prvCitationMode"]
 helpKey = config["helpKey"]
 resetChatKey = config["resetChatKey"]
-regenerateKey = config["regenerateKey"]
-rollbackKey = config["rollbackKey"]
-
-rev_config = configure()
+api = config['api']
 
 # Signal Number
 HEART_BEAT = 5005
@@ -226,7 +225,7 @@ def handle_wxuser_list(j):
 
 def handle_recv_txt_msg(j):
     print(j)
-
+    print('get mess')
     wx_id = j["wxid"]
     room_id = ""
     content: str = j["content"].strip()
@@ -259,78 +258,30 @@ def handle_recv_txt_msg(j):
     if autoReply and ((not is_room and prvReplyMode) or (is_room and grpReplyMode)):
         if content.startswith(helpKey):
             if is_room:
-                reply = str(
-                    b'\xe6\xac\xa2\xe8\xbf\x8e\xe4\xbd\xbf\xe7\x94\xa8 ChatGPT-weBot\xef\xbc\x8c\xe6\x9c\xac\xe9'
-                    b'\xa1\xb9\xe7\x9b\xae\xe5\x9c\xa8 github \xe5\x90\x8c\xe5\x90\x8d\xe5\xbc\x80\xe6\xba\x90\n',
-                    'utf-8') + helpKey + " 查看可用命令帮助\n" + groupChatKey + " 唤醒群内机器人\n" + resetChatKey + \
-                        " 重置上下文\n" + regenerateKey + " 重新生成答案\n" + rollbackKey + " +数字n 回滚到倒数第n个问题"
+                reply = "我是chatGPT机器人\n" + helpKey + " 查看可用命令帮助\n" + groupChatKey + " 唤醒群内机器人\n" + resetChatKey + \
+                        " 重置上下文\n"
 
             else:
-                reply = str(
-                    b'\xe6\xac\xa2\xe8\xbf\x8e\xe4\xbd\xbf\xe7\x94\xa8 ChatGPT-weBot\xef\xbc\x8c\xe6\x9c\xac\xe9'
-                    b'\xa1\xb9\xe7\x9b\xae\xe5\x9c\xa8 github \xe5\x90\x8c\xe5\x90\x8d\xe5\xbc\x80\xe6\xba\x90\n',
-                    'utf-8') + helpKey + " 查看可用命令帮助\n" + privateChatKey + " 唤醒机器人\n" + resetChatKey + \
-                        " 重置上下文\n" + regenerateKey + " 重新生成答案\n" + rollbackKey + " +数字n 回滚到倒数第n个问题"
+                reply = "我是chatGPT机器人\n" + helpKey + " 查看可用命令帮助\n" + privateChatKey + " 唤醒机器人\n" + resetChatKey + \
+                        " 重置上下文\n"
             time.sleep(1.5)
-
         elif content.startswith(resetChatKey):
             if chatbot is not None:
-                chatbot.clear_conversations()
-                del (global_dict[(wx_id, room_id)])
+                chatbot.reset()
                 reply = "重置完成"
             else:
                 reply = "您还没有开始第一次对话"
                 time.sleep(1.5)
-
-        elif content.startswith(regenerateKey):
-            if chatbot is None or chatbot.prompt is None:
-                reply = "您还没有问过问题"
-                time.sleep(1.5)
-            else:
-                print("ask:" + chatbot.prompt)
-                for data in chatbot.ask(
-                        prompt=None,
-                ):
-                    reply += data["message"][len(reply):]
-
-                if (grpCitationMode and is_room) or (prvCitationMode and not is_room):
-                    reply = chatbot.prompt + "\n- - - - - - - -\n" + reply.strip()
-
-        elif content.startswith(rollbackKey):
-            if chatbot is None:
-                reply = "您还没有问过问题"
-
-            else:
-                num = re.sub(rollbackKey + "\\s+", "", content)
-                if num.isdigit():
-                    if len(chatbot.prompt_prev_queue) < int(num):
-                        reply = "无法回滚到" + num + "个问题之前"
-
-                    else:
-                        chatbot.rollback_conversation(int(num))
-                        reply = "已回滚到" + num + "个问题之前"
-                else:
-                    reply = "请在回滚指令后输入有效数字"
-
-            time.sleep(1.5)
-
         elif is_ask:
             if chatbot is None:
-                chatbot = Chatbot(
-                    rev_config,
-                    conversation_id=None,
-                    parent_id=None,
-                )
+                chatbot = Chatbot(api_key=api)
                 if is_room:
                     global_dict[(wx_id, room_id)] = chatbot
                 else:
                     global_dict[(wx_id, "")] = chatbot
 
             print("ask:" + content)
-            for data in chatbot.ask(
-                    prompt=content,
-            ):
-                reply += data["message"][len(reply):]
+            reply = chatbot.ask(prompt=content,role="user")
 
             if (grpCitationMode and is_room) or (prvCitationMode and not is_room):
                 reply = content + "\n- - - - - - - -\n" + reply.strip()
@@ -361,24 +312,12 @@ def handle_heartbeat(j):
 
 
 def on_open(ws):
-    chatbot = Chatbot(
-        rev_config,
-        conversation_id=None,
-        parent_id=None,
-    )
-    try:
-        chatbot.login()
-    except Exception:
-        raise Exception("Exception detected, check revChatGPT login config")
-    else:
-        print("\nChatGPT login test success!\n")
-
     # ws.send(send_wxuser_list())  # 获取微信通讯录好友列表
     # ws.send(get_chatroom_memberlist())
 
     ws.send(get_personal_info())
 
-    # ws.send(send_txt_msg("server is online", "filehelper"))
+    ws.send(send_txt_msg("server is online", "filehelper"))
 
     # ws.send(send_txt_msg())     # 向你的好友发送微信文本消息
 

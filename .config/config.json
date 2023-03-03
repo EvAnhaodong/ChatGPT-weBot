@@ -10,7 +10,6 @@
   "prvCitationMode": false,
 
   "helpKey": "-h",
-  "resetChatKey": "-rs",
-  "regenerateKey": "-rg",
-  "rollbackKey": "-rb"
+  "resetChatKey": "-rs"
+  "api":
 }
