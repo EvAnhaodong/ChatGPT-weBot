@@ -1,10 +1,7 @@
 <h1 align="center">ChatGPT-weBot</h1>
 
 
-
-[TOC]
-
-使用基于 ChatGPT官方API 和 官方微信 hook 接口 的 ChatGPT-weBot 机器人。中文文档 | [English](./Readme.md)
+使用基于 ChatGPT官方API 和 官方微信 hook 接口 的 ChatGPT-weBot 机器人
 
 ###### 作者
 
