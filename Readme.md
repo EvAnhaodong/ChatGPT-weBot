@@ -4,76 +4,61 @@
 
 [TOC]
 
-Using ChatGPT-weBot based on ChatGPT(Non-API key call) and official WeChat hook interface. [中文文档](./Readme_ZH.md) | English
+使用基于 ChatGPT官方API 和 官方微信 hook 接口 的 ChatGPT-weBot 机器人。中文文档 | [English](./Readme.md)
 
-<div align="center"> <img src="assets/DALL·E  - A robot is working hard to transform, modify, and revolutionize the WeChat software.png" width="50%"> </div>
+###### 作者
 
-###### Author
-
-[Snapdragon Lee (github.com)](https://github.com/SnapdragonLee) 
-
-*cover created from [DALL·E2 (openai.com)](https://labs.openai.com/)*
+[Snapdragon Lee (github.com)](https://github.com/SnapdragonLee)
+[yehaodong (github.com)](https://github.com/EvAnhaodong)
 
 
+## 支持和特点
 
-## Support & Features
-
-- [x] Support conversation.
-- [x] Support context-aware question answering
-- [x] **Never get banned by using official WeChat execution.**
-- [x] Set the keywords to wake up the WeChat robot in private.
-- [x] Set the keywords to wake up the WeChat robot in the group.
-- [x] Support replying *at-message* when mentioning your bot in the group. **(have bugs)**
-- [x] Get help doc in line. 
-- [x] Set keywords to reset the previous conversation. 
-- [x] Regenerate to get another answer. 
-- [x] Rollback conversation. 
-- [ ] Other
+- [x] 支持对话
+- [x] 支持上下文感知问答
+- [x] **使用官方微信软件执行，信息来源方面永不封禁**
+- [x] 设置关键字在私聊中唤醒微信机器人
+- [x] 设置关键字在群中唤醒微信机器人
+- [x] 在线获取帮助文档
+- [x] 设置关键字以重置之前的对话
+- [x] 重新生成答案
 
 
-
-
-
-## Default configs (Follow steps before you start server)
+## 默认配置 （请在启动前仔细阅读，所有配置文件在.config中）
 
 ```
 {
-  // Setting host running locally (only local)
+  // 本地host运行地址（仅本地）
   "server_host": "127.0.0.1:5555",
 
-  // Whether to enable ChatGPT auto-reply function
+  // 是否开启ChatGPT自动回复
   "autoReply": true,
-  // Setting keyword to wake up bot in group chat
+  // 在群聊中设置唤醒机器人关键词
   "groupChatKey": "-c",
-  // Using reply mode in group chat
+  // 在群聊中响应回复
   "grpReplyMode": false,
-  // Origin question quote on head of answer in group chat
+  // 在群聊回答前添加源问题格式
   "grpCitationMode": true,
-  // Setting keyword to wake up bot in private chat
+  // 在私聊中设置唤醒机器人关键词
   "privateChatKey": "-c",
-  // Using reply mode in private chat
+  // 在私聊中响应回复
   "prvReplyMode": true,
-  // Origin question quote on head of answer in private chat
+  // 在群聊回答前添加源问题格式
   "prvCitationMode": false,
 
-  // View available command help
+  // 查看可用命令帮助
   "helpKey": "-h",
-  // Setting keyword to reset context
+  // 设置重置上下文关键词
   "resetChatKey": "-rs",
-  // Setting keyword to regenerate previous answer
-  "regenerateKey": "-rg",
-  // Setting keyword to roll back to previous n questions
-  "rollbackKey": "-rb"
+  // ChatGPT API key : https://platform.openai.com/account/api-keys
+  "api": ""
 }
 ```
 
 
+## 启动步骤
 
-
-
-## Step to Start
-
-1. Install all packages listed in `requirements.txt` , use the command like:
+1. 安装 `requirements.txt` 中列出的所有包，使用如下命令：
 
    ```
    pip install -r ./requirements.txt
@@ -81,91 +66,38 @@ Using ChatGPT-weBot based on ChatGPT(Non-API key call) and official WeChat hook 
 
    
 
-2. Download package from Github Releases.
+2. 从 Github Releases 下载需要的包。
 
-3. Install `WeChat-3.6.0.18.exe` on your computer, **if your version is higher than 3.6.0.18, you can downgrade instantly.** Then get your account online. You can also download zip version of WeChat. **If you wanna dual-call WeChat, modify `./dual-start.bat` file guiding by annotation.**
+3. 在您的计算机上安装 `WeChat-3.6.0.18.exe`，**如果您正在使用的微信版本高于3.6.0.18，可以降级覆盖安装。** 之后请登陆您的微信。**
 
    
+4. 运行服务器监控微信消息。这里有两种方法可以实现，请 ***二选一***：
 
-4. Monitoring WeChat message by running a server. Here are two methods to achieve this, **please *choose 1 method*** :
-
-   - Using injector named `DLLinjector_V1.0.3.exe`, then choose file named `3.6.0.18-0.0.0.008.dll` to inject.
-
-     ![image-20230221044543472](assets/image-20230221044543472.png)
-
-     
-
-   - Running `funtool_3.6.0.18-1.0.0013.exe` , and press `Start` .
+   - 运行 `funtool_3.6.0.18-1.0.0013.exe` ，后点击 `Start` 。
 
      ![image-20230221044609319](assets/image-20230221044609319.png)
 
-   
+5. 在 `.config/` 目录下填写 JSON 文件。
 
-5. The last step is fill json files listed in `.config/` . 
+   - 在 `config.json` 中，您需要根据自己的偏好配置自定义选项。
 
-   - In `config.json` ,  you need to configure your custom options based on your preferences.
-
-   - In `rev_config.json` , you need to fill your ChatGPT login information by *choosing 1 method*: 
-
-     - Email/Password **(Not supported for Google/Microsoft accounts)**
-
-     - session_token **(supported for Google/Microsoft accounts)**
-
-       > 1. Go to [`chat.openai.com/chat`](https://chat.openai.com/chat) and log in or sign up.
-       > 2. Press `F12` to open dev tools.
-       > 3. Copy cookies as `__Secure-next-auth.session-token` .
-
-     
-
-6. Run `main.py` by using command:
+6. 运行以下命令启动服务：
 
    ```
    python main.py
    ```
 
-   **Everything is ready, feel free to go online with your ChatGPT-weBot !** 
-   
-   No limitation, No usage counting, and no payment needed.
+   **一切准备就绪，欢迎使用 ChatGPT-weBot！** 
 
 
+## 常见问题解答
+
+1. 如何获取所有的回复？您可以用您的语言说 “请继续”。
+2. 遇到问题了吗？随时来创建一个 issue 进行发布。
 
 
-
-## Q&A
-
-1. How to get all response? You can say "continue" in your language.
-2. Have problems? Feel free to create an issue.
-
-
-
-## Who has starred
-
-[![Stargazers repo roster for @SnapdragonLee/ChatGPT-weBot](https://reporoster.com/stars/dark/SnapdragonLee/ChatGPT-weBot)](https://github.com/SnapdragonLee/ChatGPT-weBot/stargazers)
-
-
-
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/SnapdragonLee/ChatGPT-weBot.svg)](https://starchart.cc/SnapdragonLee/ChatGPT-weBot) 
-
-
-
-## Log
-
-- 2023.2.27 Add zip version of WeChat and `dual-start.bat`,  fix the bug that prevents other operations when the response keyword is empty.
-- 2023.2.25 Add the option in `config.json` to quote the original question before answering 
-- 2023.2.25 Complete all API function on features and Debugs for errors
-- 2023.2.23 Accomplish some API listed on features
-- 2023.2.23 Fix streaming issue when connecting to reverse server
-- 2023.2.21 Report issue on ChatGPT API
-- 2023.2.20 v0.90-dev released, for basic ChatGPT API usage on WeChat
-- 2023.2.17 Start to develop the whole process
-
-
-
-
-
-###### Reference
+###### 参考
 
 - [AutumnWhj/ChatGPT-wechat-bot: ChatGPT for wechat](https://github.com/AutumnWhj/ChatGPT-wechat-bot)
 - [cixingguangming55555/wechat-bot: 带二次开发接口的PC微信聊天机器人](https://github.com/cixingguangming55555/wechat-bot)
+
