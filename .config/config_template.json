@@ -11,7 +11,5 @@
 
   "helpKey": "-h",
   "resetChatKey": "-rs",
-  "api":"",
-  "base":"",
-  "engine":""
+  "yaml":"azure.yaml"
 }
