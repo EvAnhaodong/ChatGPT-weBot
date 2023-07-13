@@ -23,9 +23,7 @@ prvReplyMode = config["prvReplyMode"]
 prvCitationMode = config["prvCitationMode"]
 helpKey = config["helpKey"]
 resetChatKey = config["resetChatKey"]
-api = config['api']
-base = config['base']
-engine = config['engine']
+yaml = config['yaml']
 
 # Signal Number
 HEART_BEAT = 5005
@@ -276,7 +274,8 @@ def handle_recv_txt_msg(j):
                 time.sleep(1.5)
         elif is_ask:
             if chatbot is None:
-                chatbot = Chatbot(api_key=api,api_base=base,engine=engine)
+                chatbot = Chatbot()
+                chatbot.load(yaml)
                 if is_room:
                     global_dict[(wx_id, room_id)] = chatbot
                 else:
